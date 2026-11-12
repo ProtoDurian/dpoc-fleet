@@ -43,4 +43,10 @@ spec:
           resources: {requests: {cpu: 50m, memory: 128Mi}}
       volumes:
         - {name: ca, secret: {secretName: dpoc-ca}}
-        - {name: work, emptyDir: {}}
+        - {name: work, persistentVolumeClaim: {claimName: dpoc-t3-work}}
+---
+# T3's local files (ledger copy, DNS call log) survive pod restarts; the lead copies LEDGER.jsonl back to the box.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: dpoc-t3-work, namespace: dpoc-t3}
+spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 1Gi}}}
