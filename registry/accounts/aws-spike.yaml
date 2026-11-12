@@ -1,4 +1,0 @@
-apiVersion: dpoc.specpenguin.dev/v1alpha1
-kind: ProviderAccount
-metadata: {name: aws-spike}
-spec: {vendor: aws, note: "k3s on EC2 ap-southeast-1 for the cloud run"}

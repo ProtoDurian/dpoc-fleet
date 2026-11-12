@@ -1,4 +1,4 @@
 apiVersion: dpoc.specpenguin.dev/v1alpha1
 kind: ClusterRegistration
 metadata: {name: pichu-opal}
-spec: {landscape: pichu, mark: opal, provider: k3d, account: local, lbIp: "172.18.0.5", traffic: true}
+spec: {landscape: pichu, mark: opal, provider: k3d, account: local, lbIp: "172.18.0.6", traffic: true}

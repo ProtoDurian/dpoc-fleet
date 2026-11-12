@@ -1,4 +1,0 @@
-apiVersion: dpoc.specpenguin.dev/v1alpha1
-kind: ClusterRegistration
-metadata: {name: raichu-jade}
-spec: {landscape: raichu, mark: jade, provider: digitalocean, account: do-spike, region: SIN, lbIp: "104.248.96.40", traffic: true}

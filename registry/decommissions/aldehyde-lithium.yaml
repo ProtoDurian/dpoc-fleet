@@ -1,4 +1,0 @@
-apiVersion: dpoc.specpenguin.dev/v1alpha1
-kind: Decommission
-metadata: {name: aldehyde-lithium, namespace: argocd}
-spec: {target: {platform: aldehyde, service: lithium}, confirm: lithium, reason: "PoC clean-up (re-test of the decommission race fix)"}
