@@ -1,0 +1,4 @@
+apiVersion: dpoc.specpenguin.dev/v1alpha1
+kind: Decommission
+metadata: {name: nitroso-tin, namespace: argocd}
+spec: {target: {platform: nitroso, service: tin}, confirm: tin, reason: "PoC clean-up (re-test of the decommission race fix)"}
