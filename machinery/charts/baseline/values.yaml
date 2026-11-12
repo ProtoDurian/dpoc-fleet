@@ -2,3 +2,13 @@ landscape: ""
 mark: ""
 cluster: ""
 roots: [c.dpoc.specpenguin.dev, cf.dpoc.specpenguin.dev]
+# SEARCH is set on workloads; only matching resources can request a rollout.
+reloader:
+  reloader:
+    autoReloadAll: false
+    watchGlobally: true
+    reloadOnCreate: false
+    reloadOnDelete: false
+    syncAfterRestart: false
+    reloadStrategy: annotations
+    logFormat: json
