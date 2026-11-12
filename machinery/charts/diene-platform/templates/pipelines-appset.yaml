@@ -1,0 +1,44 @@
+{{- if eq .Values.mode "platform" }}
+{{- $p := .Values.platform -}}
+# The service list IS the folder list platforms/<p>/<svc>/ in dpoc-fleet-state (pick 3b; no services.yaml, pick 2).
+# One Application per service renders that service's Kargo Warehouse + Stages (this chart, mode=pipeline).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ $p }}-pipelines
+  namespace: argocd
+spec:
+  syncPolicy: {preserveResourcesOnDeletion: true}
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: {{ .Values.state.repoURL }}
+        revision: {{ .Values.state.branch }}
+        requeueAfterSeconds: {{ .Values.gitRequeueSeconds }}
+        directories: [{path: "platforms/{{ $p }}/*"}]
+  template:
+    metadata:
+      name: '{{ $p }}-{{ "{{" }} .path.basename {{ "}}" }}-pipeline'
+      labels: {diene.atomi.cloud/platform: {{ $p }}, diene.atomi.cloud/service: '{{ "{{" }} .path.basename {{ "}}" }}', diene.atomi.cloud/kind: pipeline}
+    spec:
+      project: default
+      sources:
+        - repoURL: {{ .Values.machinery.repoURL }}
+          targetRevision: {{ .Values.machinery.revision }}
+          path: {{ .Values.machinery.path }}
+          helm:
+            releaseName: '{{ $p }}-{{ "{{" }} .path.basename {{ "}}" }}-pipeline'
+            ignoreMissingValueFiles: true
+            valueFiles: [$carbon/platform.yaml, {{ .Values.machinery.regionsFile }}]
+            parameters:
+              - {name: platform, value: {{ $p }}}
+              - {name: mode, value: pipeline}
+              - {name: service, value: '{{ "{{" }} .path.basename {{ "}}" }}'}
+        - repoURL: {{ required "carbon.repoURL is required" .Values.carbon.repoURL }}
+          targetRevision: {{ .Values.carbon.revision }}
+          ref: carbon
+      destination: {server: https://kubernetes.default.svc, namespace: {{ $p }}}
+      syncPolicy:
+        automated: {prune: true, selfHeal: true}
+{{- end }}

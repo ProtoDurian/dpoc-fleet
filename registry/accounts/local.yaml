@@ -1,0 +1,4 @@
+apiVersion: dpoc.specpenguin.dev/v1alpha1
+kind: ProviderAccount
+metadata: {name: local}
+spec: {vendor: k3d, note: "k3d on the dpoc-build droplet; cloud accounts do-spike / aws-spike added for the cloud run"}

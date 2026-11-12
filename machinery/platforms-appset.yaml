@@ -1,0 +1,37 @@
+# platforms: SCM-provider generator over ProtoDurian/dpoc-*.carbon -> one Application per platform (new platform = new repo).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata: {name: platforms, namespace: argocd}
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - scmProvider:
+        requeueAfterSeconds: 90
+        cloneProtocol: https
+        github: {organization: ProtoDurian, allBranches: false}
+        filters:
+          - repositoryMatch: '^dpoc-[a-z0-9]+\.carbon$'
+  template:
+    metadata:
+      name: 'platform-{{ trimPrefix "dpoc-" (trimSuffix ".carbon" .repository) }}'
+      labels: {diene.atomi.cloud/platform: '{{ trimPrefix "dpoc-" (trimSuffix ".carbon" .repository) }}'}
+    spec:
+      project: default
+      sources:
+        - repoURL: https://github.com/ProtoDurian/dpoc-fleet.git
+          targetRevision: main
+          path: machinery/charts/diene-platform
+          helm:
+            releaseName: 'platform-{{ trimPrefix "dpoc-" (trimSuffix ".carbon" .repository) }}'
+            ignoreMissingValueFiles: true
+            valueFiles: [$carbon/platform.yaml, ../../regions.yaml]
+            parameters:
+              - {name: platform, value: '{{ trimPrefix "dpoc-" (trimSuffix ".carbon" .repository) }}'}
+              - {name: carbon.repoURL, value: '{{ .url }}'}
+              - {name: carbon.revision, value: '{{ .branch }}'}
+        - {repoURL: '{{ .url }}', targetRevision: '{{ .branch }}', ref: carbon}
+      destination: {server: https://kubernetes.default.svc, namespace: argocd}
+      syncPolicy:
+        automated: {prune: true, selfHeal: true}
+        syncOptions: [ServerSideApply=true]

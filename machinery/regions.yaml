@@ -1,0 +1,9 @@
+# Static: the allowed region codes (IATA, D1) and what each means per provider. The compiler chart drops any
+# platform.yaml landscape whose Landscape is not registered here (UnknownLandscape).
+regions:
+  pichu: SIN
+  raichu: SIN
+  ampharos: SFO
+regionMap:
+  SIN: {digitalocean: sgp1, aws: ap-southeast-1, neon: aws-ap-southeast-1, upstash: ap-southeast-1}
+  SFO: {digitalocean: sfo3, aws: us-west-1, neon: aws-us-west-2, upstash: us-west-1}

@@ -1,0 +1,111 @@
+{{- if eq .Values.mode "platform" }}
+{{- $p := .Values.platform -}}{{- $np := .Values.namePrefix -}}
+{{- $rows := printf "platforms/%s/*/*.yaml" $p }}
+{{- $roots := .Values.roots | toJson }}
+# ONE row file (platforms/<p>/<svc>/<l>.yaml) -> TWO kinds of Application:
+#   <p>-app        : matrix(rows x clusters labelled landscape=<row landscape>) -> app chart on EVERY cluster of the landscape
+#   <p>-primordial : rows only -> primordial chart ONCE on Primordial (namespace <p>-<l>)
+# Empty pins render nothing. preserveResourcesOnDeletion: deleting a row never deletes workloads or dependency records.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata: {name: {{ $p }}-app, namespace: argocd}
+spec:
+  syncPolicy: {preserveResourcesOnDeletion: true}
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: {{ .Values.state.repoURL }}
+              revision: {{ .Values.state.branch }}
+              requeueAfterSeconds: {{ .Values.gitRequeueSeconds }}
+              files: [{path: "{{ $rows }}"}]
+          - clusters:
+              selector:
+                matchLabels: {landscape: '{{ "{{" }} .landscape {{ "}}" }}', dpoc.specpenguin.dev/role: workload}
+      selector:
+        matchExpressions: [{key: pin.chart, operator: NotIn, values: [""]}]
+  template:
+    metadata:
+      name: '{{ $p }}-{{ "{{" }} .service {{ "}}" }}-{{ "{{" }} .landscape {{ "}}" }}-{{ "{{" }} index .metadata.labels "mark" {{ "}}" }}'
+      labels:
+        diene.atomi.cloud/platform: {{ $p }}
+        diene.atomi.cloud/service: '{{ "{{" }} .service {{ "}}" }}'
+        diene.atomi.cloud/landscape: '{{ "{{" }} .landscape {{ "}}" }}'
+        diene.atomi.cloud/kind: app
+      annotations:
+        kargo.akuity.io/authorized-stage: '{{ $p }}:{{ "{{" }} .service {{ "}}" }}-{{ "{{" }} .landscape {{ "}}" }}'
+    spec:
+      project: default
+      source:
+        repoURL: {{ .Values.oci.argoRepo }}
+        chart: '{{ $np }}{{ $p }}-{{ "{{" }} .service {{ "}}" }}'
+        targetRevision: '{{ "{{" }} .pin.chart {{ "}}" }}'
+        helm:
+          releaseName: '{{ "{{" }} .service {{ "}}" }}'
+          ignoreMissingValueFiles: true
+          valueFiles: ['landscapes/{{ "{{" }} .landscape {{ "}}" }}.yaml']
+      destination:
+        server: '{{ "{{" }} .server {{ "}}" }}'
+        namespace: {{ $p }}
+      syncPolicy:
+        automated: {prune: true, selfHeal: true}
+        syncOptions: [CreateNamespace=true]
+        retry: {limit: 20, backoff: {duration: 10s, factor: 1, maxDuration: 30s}}
+  # values order: chart defaults < chart landscapes/<l>.yaml (pick 7a) < row-derived dpoc block < row values: (LAST, deep merge)
+  templatePatch: |
+    {{ "{{" }}- $v := dict "dpoc" (dict "platform" "{{ $p }}" "service" .service "landscape" .landscape "cluster" .name "mark" (index .metadata.labels "mark") "roots" ({{ $roots | quote }} | fromYamlArray)) "image" (dict "tag" .pin.image) {{ "}}" }}
+    {{ "{{" }}- if and (hasKey . "values") .values {{ "}}" }}{{ "{{" }} $v = mergeOverwrite $v (deepCopy .values) {{ "}}" }}{{ "{{" }} end {{ "}}" }}
+    spec:
+      source:
+        helm:
+          valuesObject: {{ "{{" }} toJson $v {{ "}}" }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata: {name: {{ $p }}-primordial, namespace: argocd}
+spec:
+  syncPolicy: {preserveResourcesOnDeletion: true}
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: {{ .Values.state.repoURL }}
+        revision: {{ .Values.state.branch }}
+        requeueAfterSeconds: {{ .Values.gitRequeueSeconds }}
+        files: [{path: "{{ $rows }}"}]
+      selector:
+        matchExpressions: [{key: pin.primordial, operator: NotIn, values: [""]}]
+  template:
+    metadata:
+      name: '{{ $p }}-{{ "{{" }} .service {{ "}}" }}-{{ "{{" }} .landscape {{ "}}" }}-primordial'
+      labels:
+        diene.atomi.cloud/platform: {{ $p }}
+        diene.atomi.cloud/service: '{{ "{{" }} .service {{ "}}" }}'
+        diene.atomi.cloud/landscape: '{{ "{{" }} .landscape {{ "}}" }}'
+        diene.atomi.cloud/kind: primordial
+      annotations:
+        kargo.akuity.io/authorized-stage: '{{ $p }}:{{ "{{" }} .service {{ "}}" }}-{{ "{{" }} .landscape {{ "}}" }}'
+    spec:
+      project: default
+      source:
+        repoURL: {{ .Values.oci.argoRepo }}
+        chart: '{{ $np }}{{ $p }}-{{ "{{" }} .service {{ "}}" }}-primordial'
+        targetRevision: '{{ "{{" }} .pin.primordial {{ "}}" }}'
+        helm:
+          releaseName: '{{ "{{" }} .service {{ "}}" }}-{{ "{{" }} .landscape {{ "}}" }}'
+          ignoreMissingValueFiles: true
+          valueFiles: ['landscapes/{{ "{{" }} .landscape {{ "}}" }}.yaml']
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ $p }}-{{ "{{" }} .landscape {{ "}}" }}'
+      syncPolicy:
+        automated: {prune: true, selfHeal: true}
+        syncOptions: [CreateNamespace=true]
+  templatePatch: |
+    spec:
+      source:
+        helm:
+          valuesObject: {{ "{{" }} toJson (dict "dpoc" (dict "platform" "{{ $p }}" "service" .service "landscape" .landscape "roots" ({{ $roots | quote }} | fromYamlArray))) {{ "}}" }}
+{{- end }}

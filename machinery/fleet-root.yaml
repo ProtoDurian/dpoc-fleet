@@ -1,0 +1,19 @@
+# fleet-root: the ONE hand-applied object. Syncs registry/ (people) + static machinery (CRDs, T3, AppSets).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: {name: fleet-root, namespace: argocd}
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/ProtoDurian/dpoc-fleet.git
+      targetRevision: main
+      path: machinery
+      directory: {recurse: true, include: '{fleet-root.yaml,platforms-appset.yaml,baseline-appset.yaml,crds/*.yaml,t3/*.yaml}'}
+    - repoURL: https://github.com/ProtoDurian/dpoc-fleet.git
+      targetRevision: main
+      path: registry
+      directory: {recurse: true}
+  destination: {server: https://kubernetes.default.svc, namespace: argocd}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [ServerSideApply=true]

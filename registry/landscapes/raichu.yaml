@@ -1,0 +1,4 @@
+apiVersion: dpoc.specpenguin.dev/v1alpha1
+kind: Landscape
+metadata: {name: raichu}
+spec: {region: SIN, tier: production}

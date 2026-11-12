@@ -1,0 +1,27 @@
+# --- inputs (filled by the platform-<p> Application) ---
+platform: ""          # from the carbon repo name dpoc-<p>.carbon
+landscapes: []        # $carbon/platform.yaml
+stages: []            # $carbon/platform.yaml
+maturity: young       # $carbon/platform.yaml (pick 6b)
+regions: {}           # machinery/regions.yaml
+regionMap: {}
+# --- machinery settings (static) ---
+namePrefix: dpoc-
+state:                # pick 4b: machine-written rows live in their own repo
+  repoURL: https://github.com/ProtoDurian/dpoc-fleet-state.git      # Argo CD reads (public, anonymous)
+  pushURL: git@github.com:ProtoDurian/dpoc-fleet-state.git          # Kargo writes (deploy key)
+  branch: main
+oci:
+  argoRepo: reg.dpoc.specpenguin.dev/charts
+  kargoCharts: oci://reg.dpoc.specpenguin.dev/charts
+  images: reg.dpoc.specpenguin.dev
+roots: [c.dpoc.specpenguin.dev, cf.dpoc.specpenguin.dev, s.dpoc.specpenguin.dev]
+mode: platform        # platform | pipeline
+service: ""
+gitRequeueSeconds: 30
+carbon: {repoURL: "", revision: main}
+machinery:
+  repoURL: https://github.com/ProtoDurian/dpoc-fleet.git
+  revision: main
+  path: machinery/charts/diene-platform
+  regionsFile: ../../regions.yaml

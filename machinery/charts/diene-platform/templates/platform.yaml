@@ -1,0 +1,50 @@
+{{- $p := required "platform is required" .Values.platform -}}
+{{- if eq .Values.mode "platform" }}
+# Stand-in for the T3 Platform record: what the compiler saw (read by T3 for edge docs + TLS names).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-{{ $p }}
+  namespace: argocd
+  labels: {dpoc.specpenguin.dev/platform-record: "true"}
+data:
+  platform: {{ $p }}
+  maturity: {{ .Values.maturity | quote }}
+  landscapes: {{ .Values.landscapes | toJson | quote }}
+  steps: {{ include "dp.steps" . | quote }}
+  unknownLandscapes: {{ include "dp.unknown" . | quote }}
+  carbonRepo: {{ .Values.carbon.repoURL | quote }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $p }}
+  labels: {kargo.akuity.io/project: "true"}
+  annotations: {argocd.argoproj.io/sync-wave: "-2"}
+{{- range $l := .Values.landscapes }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $p }}-{{ $l }}
+  annotations: {argocd.argoproj.io/sync-wave: "-2"}
+{{- end }}
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Project
+metadata:
+  name: {{ $p }}
+  annotations: {argocd.argoproj.io/sync-wave: "-1"}
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: {{ $p }}
+  namespace: {{ $p }}
+spec:
+  promotionPolicies:
+    - stageSelector: {matchLabels: {diene.atomi.cloud/gate: auto}}
+      autoPromotionEnabled: true
+{{- else if eq .Values.mode "pipeline" }}
+{{ include "dp.pipeline" (dict "root" $ "svc" (required "service is required" .Values.service)) }}
+{{- end }}

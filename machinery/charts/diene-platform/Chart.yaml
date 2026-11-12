@@ -1,0 +1,5 @@
+apiVersion: v2
+name: diene-platform
+description: fleet compiler chart (spike) - platform.yaml + services.yaml -> Platform stand-in, Kargo pipeline per service, row ApplicationSets
+type: application
+version: 0.2.0

@@ -1,0 +1,40 @@
+# Gateway health responder: the traffic controller probes https://<lbIp>/healthz with Host health.<mark>.<l>.<root>.
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: gw-health}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: gw-health}}
+  template:
+    metadata: {labels: {app: gw-health}}
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami:v1.10.3
+          args: ["--port", "8080", "--name", "{{ .Values.cluster }}"]
+          ports: [{containerPort: 8080}]
+          readinessProbe: {httpGet: {path: /health, port: 8080}, periodSeconds: 2}
+          resources: {requests: {cpu: 5m, memory: 8Mi}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: gw-health}
+spec: {selector: {app: gw-health}, ports: [{port: 80, targetPort: 8080}]}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata: {name: gw-health}
+spec:
+  ingressClassName: traefik
+  rules:
+  {{- range $r := .Values.roots }}
+    - host: health.{{ $.Values.mark }}.{{ $.Values.landscape }}.{{ $r }}
+      http: {paths: [{path: /, pathType: Prefix, backend: {service: {name: gw-health, port: {number: 80}}}}]}
+  {{- end }}
+---
+# Default certificate for every HTTPS host on this cluster (Secret written by T3's cluster controller).
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata: {name: default, namespace: kube-system}
+spec:
+  defaultCertificate: {secretName: dpoc-gw-tls}

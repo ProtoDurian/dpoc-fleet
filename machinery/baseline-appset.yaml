@@ -1,0 +1,28 @@
+# baseline: one Application per registered workload cluster (gateway health responder + default TLS store).
+# A new ClusterRegistration -> T3 writes the Argo CD cluster Secret -> this AppSet fans the baseline out. No human step.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata: {name: baseline, namespace: argocd}
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  syncPolicy: {preserveResourcesOnDeletion: true}
+  generators:
+    - clusters: {selector: {matchLabels: {dpoc.specpenguin.dev/role: workload}}}
+  template:
+    metadata: {name: 'baseline-{{ .name }}'}
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/ProtoDurian/dpoc-fleet.git
+        targetRevision: main
+        path: machinery/charts/baseline
+        helm:
+          valuesObject:
+            landscape: '{{ index .metadata.labels "landscape" }}'
+            mark: '{{ index .metadata.labels "mark" }}'
+            cluster: '{{ .name }}'
+      destination: {server: '{{ .server }}', namespace: dpoc-system}
+      syncPolicy:
+        automated: {prune: true, selfHeal: true}
+        syncOptions: [CreateNamespace=true]
