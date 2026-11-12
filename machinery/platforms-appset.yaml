@@ -7,7 +7,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - scmProvider:
-        requeueAfterSeconds: 90
+        requeueAfterSeconds: 180
         cloneProtocol: https
         github: {organization: ProtoDurian, allBranches: false}
         filters:
