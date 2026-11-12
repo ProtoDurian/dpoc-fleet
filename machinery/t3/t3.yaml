@@ -26,11 +26,11 @@ spec:
       serviceAccountName: dpoc-t3
       containers:
         - name: t3
-          image: reg.dpoc.specpenguin.dev/dpoc-t3:0.1.5
+          image: reg.dpoc.specpenguin.dev/dpoc-t3:0.1.6
           imagePullPolicy: IfNotPresent
           envFrom: [{secretRef: {name: dpoc-t3-vendors}}]
           env:
-            - {name: DPOC_ENABLE, value: "cluster,materializer,deps,logto,traffic,edge"}
+            - {name: DPOC_ENABLE, value: "cluster,materializer,deps,logto,traffic,edge,decommission"}
             - {name: DPOC_T3_DIR, value: /work}
             - {name: DPOC_POC_LEDGER, value: /work/LEDGER.jsonl}
             - {name: DPOC_CA_CRT, value: /ca/ca.crt}
