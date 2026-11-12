@@ -9,7 +9,7 @@ regionMap: {}
 namePrefix: dpoc-
 state:                # pick 4b: machine-written rows live in their own repo
   repoURL: https://github.com/ProtoDurian/dpoc-fleet-state.git      # Argo CD reads (public, anonymous)
-  pushURL: git@github.com:ProtoDurian/dpoc-fleet-state.git          # Kargo writes (deploy key)
+  pushURL: https://git.dpoc.specpenguin.dev/dpoc-bot/dpoc-fleet-state.git   # Kargo + T3 write here; relay mirrors to GitHub (org blocks deploy keys)
   branch: main
 oci:
   argoRepo: reg.dpoc.specpenguin.dev/charts
