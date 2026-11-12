@@ -1,4 +1,0 @@
-apiVersion: dpoc.specpenguin.dev/v1alpha1
-kind: ClusterRegistration
-metadata: {name: ampharos-opal}
-spec: {landscape: ampharos, mark: opal, provider: k3d, account: local, lbIp: "172.18.0.8", traffic: false}

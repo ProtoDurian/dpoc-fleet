@@ -1,4 +1,0 @@
-apiVersion: dpoc.specpenguin.dev/v1alpha1
-kind: ClusterRegistration
-metadata: {name: raichu-ruby}
-spec: {landscape: raichu, mark: ruby, provider: k3d, account: local, lbIp: "172.18.0.6", traffic: false}

@@ -1,4 +1,0 @@
-apiVersion: dpoc.specpenguin.dev/v1alpha1
-kind: ClusterRegistration
-metadata: {name: raichu-opal}
-spec: {landscape: raichu, mark: opal, provider: k3d, account: local, lbIp: "172.18.0.7", traffic: false}
