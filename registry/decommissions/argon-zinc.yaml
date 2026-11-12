@@ -1,0 +1,5 @@
+# Removing a service = this record (never file deletion). confirm must re-type the service name.
+apiVersion: dpoc.specpenguin.dev/v1alpha1
+kind: Decommission
+metadata: {name: argon-zinc, namespace: argocd}
+spec: {target: {platform: argon, service: zinc}, confirm: zinc, reason: "drill 11"}
