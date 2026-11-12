@@ -7,9 +7,9 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - scmProvider:
-        requeueAfterSeconds: 180
+        requeueAfterSeconds: 30
         cloneProtocol: https
-        github: {organization: ProtoDurian, allBranches: false}
+        github: {organization: ProtoDurian, allBranches: false, api: "http://172.18.0.1:18080/"}  # read-only proxy on the lead box (CHALLENGES 3)
         filters:
           - repositoryMatch: '^dpoc-[a-z0-9]+\.carbon$'
   template:
