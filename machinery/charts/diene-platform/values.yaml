@@ -15,7 +15,7 @@ oci:
   argoRepo: reg.dpoc.specpenguin.dev/charts
   kargoCharts: oci://reg.dpoc.specpenguin.dev/charts
   images: reg.dpoc.specpenguin.dev
-roots: [c.dpoc.specpenguin.dev, cf.dpoc.specpenguin.dev, s.dpoc.specpenguin.dev]
+roots: [c.dpoc.specpenguin.dev, cf.dpoc.specpenguin.dev]
 mode: platform        # platform | pipeline
 service: ""
 gitRequeueSeconds: 30

@@ -1,4 +1,4 @@
 landscape: ""
 mark: ""
 cluster: ""
-roots: [c.dpoc.specpenguin.dev, cf.dpoc.specpenguin.dev, s.dpoc.specpenguin.dev]
+roots: [c.dpoc.specpenguin.dev, cf.dpoc.specpenguin.dev]
