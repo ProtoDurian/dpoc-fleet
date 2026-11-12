@@ -26,7 +26,7 @@ spec:
       serviceAccountName: dpoc-t3
       containers:
         - name: t3
-          image: reg.dpoc.specpenguin.dev/dpoc-t3:0.1.0
+          image: reg.dpoc.specpenguin.dev/dpoc-t3:0.1.1
           imagePullPolicy: IfNotPresent
           envFrom: [{secretRef: {name: dpoc-t3-vendors}}]
           env:
