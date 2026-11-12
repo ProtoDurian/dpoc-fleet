@@ -26,7 +26,7 @@ spec:
       serviceAccountName: dpoc-t3
       containers:
         - name: t3
-          image: reg.dpoc.specpenguin.dev/dpoc-t3:0.1.2
+          image: reg.dpoc.specpenguin.dev/dpoc-t3:0.1.3
           imagePullPolicy: IfNotPresent
           envFrom: [{secretRef: {name: dpoc-t3-vendors}}]
           env:
@@ -35,6 +35,9 @@ spec:
             - {name: DPOC_POC_LEDGER, value: /work/LEDGER.jsonl}
             - {name: DPOC_CA_CRT, value: /ca/ca.crt}
             - {name: DPOC_CA_KEY, value: /ca/ca.key}
+            - {name: DPOC_R53_ZONE_ID, value: Z01952063PBXE7UC9GH4U}
+            - {name: DPOC_CF_DISTRIBUTION_ID, value: EJMX85L5IH6C1}
+            - {name: EDGE_CLOUDFRONT_DOMAIN, value: d1f522z06wh1bj.cloudfront.net}
           ports: [{containerPort: 8080}]
           volumeMounts: [{name: ca, mountPath: /ca, readOnly: true}, {name: work, mountPath: /work}]
           resources: {requests: {cpu: 50m, memory: 128Mi}}
