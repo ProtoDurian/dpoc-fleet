@@ -1,0 +1,4 @@
+apiVersion: dpoc.specpenguin.dev/v1alpha1
+kind: ClusterRegistration
+metadata: {name: ampharos-jade}
+spec: {landscape: ampharos, mark: jade, provider: digitalocean, account: do-spike, region: SFO, lbIp: "137.184.245.105", traffic: false}
