@@ -1,0 +1,4 @@
+apiVersion: dpoc.specpenguin.dev/v1alpha1
+kind: ClusterRegistration
+metadata: {name: raichu-onyx}
+spec: {landscape: raichu, mark: onyx, provider: aws, account: aws-spike, region: SIN, lbIp: "13.251.150.208", traffic: false}
