@@ -1,0 +1,43 @@
+# T3 (fleet-operator PoC) on Primordial. L0 seed (made by hand once, never in git): Secrets dpoc-t3/dpoc-t3-vendors, dpoc-t3/dpoc-ca, dpoc-t3/kc-<cluster>.
+apiVersion: v1
+kind: Namespace
+metadata: {name: dpoc-t3, annotations: {argocd.argoproj.io/sync-wave: "-5"}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: dpoc-t3, namespace: dpoc-t3}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata: {name: dpoc-t3}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: cluster-admin}
+subjects: [{kind: ServiceAccount, name: dpoc-t3, namespace: dpoc-t3}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: dpoc-t3, namespace: dpoc-t3}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: dpoc-t3}}
+  template:
+    metadata: {labels: {app: dpoc-t3}}
+    spec:
+      serviceAccountName: dpoc-t3
+      containers:
+        - name: t3
+          image: reg.dpoc.specpenguin.dev/dpoc-t3:0.1.0
+          imagePullPolicy: IfNotPresent
+          envFrom: [{secretRef: {name: dpoc-t3-vendors}}]
+          env:
+            - {name: DPOC_ENABLE, value: "cluster,materializer"}
+            - {name: DPOC_T3_DIR, value: /work}
+            - {name: DPOC_POC_LEDGER, value: /work/LEDGER.jsonl}
+            - {name: DPOC_CA_CRT, value: /ca/ca.crt}
+            - {name: DPOC_CA_KEY, value: /ca/ca.key}
+          ports: [{containerPort: 8080}]
+          volumeMounts: [{name: ca, mountPath: /ca, readOnly: true}, {name: work, mountPath: /work}]
+          resources: {requests: {cpu: 50m, memory: 128Mi}}
+      volumes:
+        - {name: ca, secret: {secretName: dpoc-ca}}
+        - {name: work, emptyDir: {}}
