@@ -7,7 +7,6 @@ metadata:
   name: platform-{{ $p }}
   namespace: argocd
   labels: {dpoc.specpenguin.dev/platform-record: "true"}
-  annotations: {dpoc.specpenguin.dev/machinery-marker: "m1"}
 data:
   platform: {{ $p }}
   maturity: {{ .Values.maturity | quote }}
