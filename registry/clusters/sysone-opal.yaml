@@ -1,0 +1,4 @@
+apiVersion: dpoc.specpenguin.dev/v1alpha1
+kind: ClusterRegistration
+metadata: {name: sysone-opal}
+spec: {landscape: sysone, mark: opal, provider: k3d, account: local, lbIp: "172.18.0.40", traffic: true}
