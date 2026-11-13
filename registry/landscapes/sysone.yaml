@@ -1,4 +1,0 @@
-apiVersion: dpoc.specpenguin.dev/v1alpha1
-kind: Landscape
-metadata: {name: sysone}
-spec: {region: SIN, tier: dev}
